@@ -7,6 +7,7 @@ import sqlite3
 # TODO: devise a method for automatically determining config file to use. (file type/extension, fs location, etc.)
 # TODO: Implement terser syntax without sql dependency for majority of use cases.
 # TODO: Multi-file/table support.
+# TODO: Add functionality to write a table back to text (updates to the table would be reflected in the file)
 
 def main():
     query = sys.argv[1]
