@@ -1,0 +1,2 @@
+# Example config. Uses python named subgroup regex syntax.
+regex=(?P<name>.*)=(?P<value>.*)
