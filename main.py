@@ -36,8 +36,8 @@ def main():
         curs.execute(insert_query, values)
 
     for row in curs.execute(query):
-        for col in row:
-            print str(col) + ',',
+        for i, col in enumerate(row):
+            print str(col) + ('', '	|')[i != len(row) - 1],
         print
 
 def create_table(cursor, filename, columns, first_row_data):
@@ -48,11 +48,16 @@ def create_table(cursor, filename, columns, first_row_data):
     cursor.execute(create_query)
 
 def get_var_from_file(var_name, filename):
+    file_str = file2str(filename)
+
+    return re.search(var_name + '=(.*)', file_str).group(1)
+
+def file2str(filename):
     read_file = open(filename, 'r')
     file_str = read_file.read()
     read_file.close()
-
-    return re.search(var_name + '=(.*)', file_str).group(1)
+    
+    return file_str
 
 # Reads file into list delimited by newlines (strips newlines)
 def file2list(filename):
