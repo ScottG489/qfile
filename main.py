@@ -28,7 +28,7 @@ def main():
             names = gdict.keys()[::-1]
             values = gdict.values()[::-1]
             if not table_exists:
-                create_table(curs, filename, names)
+                create_table(curs, filename, names, values)
                 table_exists = True
         else:
             continue
@@ -37,13 +37,13 @@ def main():
 
     for row in curs.execute(query):
         for col in row:
-            print col + ',',
+            print str(col) + ',',
         print
 
-def create_table(cursor, filename, columns):
+def create_table(cursor, filename, columns, first_row_data):
     create_query = 'CREATE TABLE ' + filename + ' ('
     for i, field in enumerate(columns):
-        create_query += field + ' text' + ('', ', ')[i != len(columns) - 1]
+        create_query += field + ' ' + ('text', 'numeric')[isnumber(first_row_data[i])] + ('', ', ')[i != len(columns) - 1]
     create_query += ')'
     cursor.execute(create_query)
 
@@ -61,6 +61,13 @@ def file2list(filename):
     f.close()
 
     return flist
+
+def isnumber(string):
+    try:
+        float(string)
+        return True
+    except:
+        return False
 
 if __name__ == "__main__":
     main()
