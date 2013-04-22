@@ -5,10 +5,11 @@ import re
 import sqlite3
 import sqlparse
 from sqlparse.sql import IdentifierList, Identifier
+# TODO: Add stdin support.
 # TODO: -c option to specify config file.
+# TODO: Ability to parse file names from sub queries.
 # TODO: devise a method for automatically determining config file to use. (file type/extension, fs location, etc.)
 # TODO: Implement terser syntax without sql dependency for majority of use cases.
-# TODO: Multi-file/table support.
 # TODO: Add functionality to write a table back to text (updates to the table would be reflected in the file)
 
 def main():
@@ -52,7 +53,13 @@ def get_filenames(query):
             if table_name:
                 return [table_name.value]
             else:
-                return statement.token_next_by_instance(i, IdentifierList).value.replace(' ', '').split(',')
+                ident_list = statement.token_next_by_instance(i, IdentifierList)
+                filenames = []
+                for ident in ident_list.tokens:
+                    filenames.append(ident.value) if isinstance(ident, Identifier) else None
+                return filenames
+
+                #return statement.token_next_by_instance(i, IdentifierList).value.replace(' ', '').split(',')
 
 def create_table(cursor, filename, columns, first_row_data):
     create_query = 'CREATE TABLE ' + filename + ' ('
