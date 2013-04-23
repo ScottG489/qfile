@@ -4,7 +4,8 @@ import sys
 import re
 import sqlite3
 import sqlparse
-from sqlparse.sql import IdentifierList, Identifier
+from sqlparse.sql import IdentifierList, Identifier, Where, Parenthesis
+# XXX: Validate SQL before trying to parse it otherwise unexpected behaviour will arise!
 # TODO: Add stdin support.
 # TODO: -c option to specify config file.
 # TODO: Ability to parse file names from sub queries.
@@ -46,18 +47,24 @@ def main():
 
 # Finds the first occurance of a FROM statement then finds the next IdentifierList (which should be a list of the table names) and returns the values in the list.
 def get_filenames(query):
+    filenames = set()
     statement = sqlparse.parse(query)[0]
     for i, token in enumerate(statement.tokens):
         if token.value.upper() == 'FROM':
             table_name = statement.token_next_by_instance(i, Identifier)
             if table_name:
-                return [table_name.value]
+                filenames.add(table_name.get_real_name())
             else:
                 ident_list = statement.token_next_by_instance(i, IdentifierList)
-                filenames = []
                 for ident in ident_list.tokens:
-                    filenames.append(ident.value) if isinstance(ident, Identifier) else None
-                return filenames
+                    filenames.add(ident.get_real_name()) if isinstance(ident, Identifier) else None
+        elif isinstance(token, Where):
+            for k, wtoken in enumerate(token.tokens):
+                if isinstance(wtoken, Parenthesis):
+                    filenames.update(get_filenames(str(token.token_next_by_instance(k, Parenthesis))[1:-1]))
+
+
+    return filenames
 
                 #return statement.token_next_by_instance(i, IdentifierList).value.replace(' ', '').split(',')
 
