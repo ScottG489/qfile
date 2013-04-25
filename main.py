@@ -6,10 +6,12 @@ import sqlite3
 import sqlparse
 from sqlparse.sql import IdentifierList, Identifier, Where, Parenthesis
 # XXX: Validate SQL before trying to parse it otherwise unexpected behaviour will arise!
-# TODO: Add stdin support.
+# TODO: -s option for overriding default stdin regex valud in config.
+# TODO: Make default config file location ~/.qfilerc
+# TODO: Add ability to get file names from statements with JOINs.
 # TODO: -c option to specify config file.
-# TODO: Ability to parse file names from sub queries.
-# TODO: devise a method for automatically determining config file to use. (file type/extension, fs location, etc.)
+# TODO: Devise method for avoiding reserved keyword conflicts with filenames.
+# TODO: devise a method for automatically determining which regex to use. (file type/extension, fs location, etc.)
 # TODO: Implement terser syntax without sql dependency for majority of use cases.
 # TODO: Add functionality to write a table back to text (updates to the table would be reflected in the file)
 
@@ -17,6 +19,8 @@ def main():
     query = sys.argv[1]
     filenames = get_filenames(query)
 
+    if not sys.stdin.isatty():
+        filenames.add('stdins')
     curs = sqlite3.connect(':memory:').cursor()
 
     # Insert rows
@@ -89,11 +93,17 @@ def file2str(filename):
 
 # Reads file into list delimited by newlines (strips newlines)
 def file2list(filename):
-    f = open(filename, 'r')
-    flist = f.read().splitlines()
-    f.close()
+    if filename == 'stdins':
+        flist = stdin2list()
+    else:
+        f = open(filename, 'r')
+        flist = f.read().splitlines()
+        f.close()
 
     return flist
+
+def stdin2list():
+    return sys.stdin.read().splitlines()
 
 def isnumber(string):
     try:

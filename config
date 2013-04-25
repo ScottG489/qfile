@@ -1,2 +1,3 @@
+stdins.regex=(?P<time>.*)<.(?P<name>.*)> (?P<text>.*)
 input_file.regex=(?P<time>.*)<.(?P<name>.*)> (?P<text>.*)
 input_file2.regex=(?P<time>.*)<.(?P<name>.*)> (?P<text>.*)
